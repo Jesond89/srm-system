@@ -8,6 +8,9 @@ import Dashboard        from './pages/Dashboard.jsx'
 import ProveedoresList  from './pages/proveedores/ProveedoresList.jsx'
 import ProveedorForm    from './pages/proveedores/ProveedorForm.jsx'
 import ProveedorPerfil  from './pages/proveedores/ProveedorPerfil.jsx'
+import OrdenesList      from './pages/ordenes/OrdenesList.jsx'
+import OrdenForm        from './pages/ordenes/OrdenForm.jsx'
+import OrdenDetalle     from './pages/ordenes/OrdenDetalle.jsx'
 
 // Layout principal con navbar + sidebar
 const AppLayout = () => (
@@ -35,7 +38,9 @@ const App = () => (
             <Route path="/proveedores/nuevo"  element={<ProveedorForm />} />
             <Route path="/proveedores/:id"    element={<ProveedorPerfil />} />
             <Route path="/proveedores/:id/editar" element={<ProveedorForm />} />
-            <Route path="/ordenes"      element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
+            <Route path="/ordenes"        element={<OrdenesList />} />
+            <Route path="/ordenes/nueva"  element={<OrdenForm />} />
+            <Route path="/ordenes/:id"    element={<OrdenDetalle />} />
             <Route path="/evaluaciones" element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
             <Route path="/alertas"      element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
             <Route path="/chatbot"      element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
