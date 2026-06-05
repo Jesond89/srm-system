@@ -6,6 +6,7 @@ import { errorMiddleware } from './middleware/error.middleware.js'
 // Rutas
 import authRoutes      from './modules/auth/auth.routes.js'
 import providerRoutes  from './modules/providers/providers.routes.js'
+import orderRoutes     from './modules/orders/orders.routes.js'
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.get('/api/health', (req, res) => {
 // ── Rutas de la API ───────────────────────────────────────────────────────────
 app.use('/api/auth',        authRoutes)
 app.use('/api/proveedores', providerRoutes)
+app.use('/api/ordenes',    orderRoutes)
 
 // ── Manejo de rutas no encontradas ────────────────────────────────────────────
 app.use((req, res) => {
