@@ -1,6 +1,6 @@
 -- ============================================================
 -- SRM System — Schema PostgreSQL (Supabase)
--- Versión 2.0 — Normalizado hasta 3NF/BCNF
+-- Versión 3.0 — Normalizado + tablas completas + constraints
 -- ============================================================
 
 -- ── ENUMs ─────────────────────────────────────────────────────────────────────
@@ -45,7 +45,8 @@ FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
 CREATE TABLE proveedores (
   id            UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre        TEXT    NOT NULL,
-  rfc           TEXT    UNIQUE NOT NULL,
+  rfc           TEXT    UNIQUE NOT NULL
+                        CHECK (rfc ~ '^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$'),
   email         TEXT,
   telefono      TEXT,
   direccion     TEXT,
@@ -87,7 +88,7 @@ CREATE TABLE evaluaciones (
                    ELSE                   'D'
                  END
                ) STORED,
-  periodo      TEXT         NOT NULL,  -- formato 'YYYY-MM'
+  periodo      TEXT         NOT NULL CHECK (periodo ~ '^\d{4}-(0[1-9]|1[0-2])$'),  -- 'YYYY-MM'
   created_at   TIMESTAMPTZ  DEFAULT now(),
   UNIQUE (proveedor_id, periodo)        -- un score por proveedor por mes
 );
@@ -124,11 +125,27 @@ CREATE TRIGGER trg_sync_proveedor_score
 AFTER INSERT OR UPDATE ON evaluaciones
 FOR EACH ROW EXECUTE FUNCTION fn_sync_proveedor_score();
 
+-- ── Catálogo de productos ─────────────────────────────────────────────────────
+-- Estandariza los productos que se pueden incluir en una OC.
+-- SCRUM-37: formulario multi-producto con búsqueda de catálogo.
+CREATE TABLE catalogo_productos (
+  id               UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre           TEXT         NOT NULL,
+  descripcion      TEXT,
+  unidad           TEXT         NOT NULL DEFAULT 'pieza',  -- pieza, kg, litro, etc.
+  precio_referencia NUMERIC(12,2) CHECK (precio_referencia >= 0),
+  activo           BOOLEAN      NOT NULL DEFAULT true,
+  created_at       TIMESTAMPTZ  DEFAULT now()
+);
+
 -- ── Órdenes de compra ─────────────────────────────────────────────────────────
 -- Se eliminó: productos JSONB y total (datos derivados → tabla productos_oc)
+-- folio generado por secuencia BD — evita colisiones entre sesiones.
+CREATE SEQUENCE seq_folio_oc START 1000;
+
 CREATE TABLE ordenes_compra (
   id           UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-  folio        TEXT      UNIQUE NOT NULL,
+  folio        TEXT      UNIQUE NOT NULL DEFAULT ('OC-' || LPAD(nextval('seq_folio_oc')::TEXT, 6, '0')),
   proveedor_id UUID      NOT NULL REFERENCES proveedores(id),
   estado       estado_oc NOT NULL DEFAULT 'borrador',
   notas        TEXT,
@@ -143,10 +160,13 @@ BEFORE UPDATE ON ordenes_compra
 FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
 
 -- ── Productos de OC (antes JSONB — normalización 1NF) ─────────────────────────
+-- producto_id es opcional: puede venir del catálogo o ser ingresado manualmente.
 CREATE TABLE productos_oc (
   id               UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
   orden_id         UUID         NOT NULL REFERENCES ordenes_compra(id) ON DELETE CASCADE,
-  nombre           TEXT         NOT NULL,
+  producto_id      UUID         REFERENCES catalogo_productos(id) ON DELETE SET NULL,
+  nombre           TEXT         NOT NULL,  -- copia del nombre (por si cambia en catálogo)
+  unidad           TEXT         NOT NULL DEFAULT 'pieza',
   cantidad         INTEGER      NOT NULL CHECK (cantidad > 0),
   precio_unitario  NUMERIC(12,2) NOT NULL CHECK (precio_unitario >= 0),
   subtotal         NUMERIC(12,2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED
@@ -205,6 +225,32 @@ CREATE TABLE alertas (
   CONSTRAINT chk_alerta_referencia CHECK (proveedor_id IS NOT NULL OR orden_id IS NOT NULL)
 );
 
+-- ── Documentos de proveedor ──────────────────────────────────────────────────
+-- SCRUM-15: subida y almacenamiento de documentos (contratos, certificaciones, etc.)
+-- url_storage apunta a Supabase Storage bucket 'documentos-proveedores'
+CREATE TABLE documentos_proveedor (
+  id           UUID  PRIMARY KEY DEFAULT gen_random_uuid(),
+  proveedor_id UUID  NOT NULL REFERENCES proveedores(id) ON DELETE CASCADE,
+  nombre       TEXT  NOT NULL,
+  tipo         TEXT  NOT NULL,       -- 'contrato', 'certificacion', 'fiscal', 'otro'
+  url_storage  TEXT  NOT NULL,       -- path en Supabase Storage
+  created_by   UUID  REFERENCES usuarios(id) ON DELETE SET NULL,
+  created_at   TIMESTAMPTZ DEFAULT now()
+);
+
+-- ── Notificaciones in-app ─────────────────────────────────────────────────────
+-- SCRUM-52: badge en navbar por usuario. Distinto de alertas (eventos del sistema).
+-- Una alerta puede generar N notificaciones (una por usuario que debe verla).
+CREATE TABLE notificaciones (
+  id         UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id UUID    NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  alerta_id  UUID    REFERENCES alertas(id) ON DELETE CASCADE,
+  titulo     TEXT    NOT NULL,
+  mensaje    TEXT    NOT NULL,
+  leida      BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- ── Sesiones del chatbot ──────────────────────────────────────────────────────
 CREATE TABLE sesiones_chat (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -240,3 +286,8 @@ CREATE INDEX idx_alertas_leida            ON alertas(leida);
 CREATE INDEX idx_alertas_proveedor        ON alertas(proveedor_id);
 CREATE INDEX idx_chat_sesion              ON chat_historial(sesion_id);
 CREATE INDEX idx_chat_usuario             ON chat_historial(usuario_id);
+CREATE INDEX idx_docs_proveedor           ON documentos_proveedor(proveedor_id);
+CREATE INDEX idx_notificaciones_usuario   ON notificaciones(usuario_id);
+CREATE INDEX idx_notificaciones_leida     ON notificaciones(usuario_id, leida);
+CREATE INDEX idx_catalogo_activo          ON catalogo_productos(activo);
+CREATE INDEX idx_productos_oc_catalogo    ON productos_oc(producto_id);
