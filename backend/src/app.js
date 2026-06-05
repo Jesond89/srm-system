@@ -3,8 +3,9 @@ import cors       from 'cors'
 import { env }    from './config/env.js'
 import { errorMiddleware } from './middleware/error.middleware.js'
 
-// Rutas (se irán agregando por módulo)
-import authRoutes from './modules/auth/auth.routes.js'
+// Rutas
+import authRoutes      from './modules/auth/auth.routes.js'
+import providerRoutes  from './modules/providers/providers.routes.js'
 
 const app = express()
 
@@ -20,6 +21,7 @@ app.get('/api/health', (req, res) => {
 
 // ── Rutas de la API ───────────────────────────────────────────────────────────
 app.use('/api/auth',        authRoutes)
+app.use('/api/proveedores', providerRoutes)
 
 // ── Manejo de rutas no encontradas ────────────────────────────────────────────
 app.use((req, res) => {
