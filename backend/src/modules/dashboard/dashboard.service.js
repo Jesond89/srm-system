@@ -16,7 +16,8 @@ export const getKpis = async () => {
   const totalProveedores  = proveedores.count || 0
   const activosProveedores = proveedores.data?.filter(p => p.activo).length || 0
   const totalOrdenes      = ordenes.count || 0
-  const pendientes        = ordenes.data?.filter(o => o.estado === 'pendiente').length || 0
+  // "pendientes" = borrador + enviado (esperando confirmación)
+  const pendientes = ordenes.data?.filter(o => ['borrador', 'enviado'].includes(o.estado)).length || 0
   const alertasActivas    = alertas.count || 0
 
   const scores = scoreData.data?.map(p => p.score_actual).filter(Boolean) || []
