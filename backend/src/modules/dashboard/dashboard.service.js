@@ -3,22 +3,18 @@ import { supabaseAdmin } from '../../config/supabase.js'
 // ── KPIs principales ──────────────────────────────────────────────────────────
 export const getKpis = async () => {
   const [proveedores, ordenes, alertas, scoreData] = await Promise.all([
-    // Proveedores activos vs total
     supabaseAdmin.from('proveedores').select('activo', { count: 'exact' }),
-    // Órdenes por estado
     supabaseAdmin.from('ordenes_compra').select('estado', { count: 'exact' }),
-    // Alertas no leídas
     supabaseAdmin.from('alertas').select('id', { count: 'exact' }).eq('leida', false),
-    // Score promedio
     supabaseAdmin.from('proveedores').select('score_actual').eq('activo', true),
   ])
 
-  const totalProveedores  = proveedores.count || 0
+  const totalProveedores   = proveedores.count || 0
   const activosProveedores = proveedores.data?.filter(p => p.activo).length || 0
-  const totalOrdenes      = ordenes.count || 0
+  const totalOrdenes       = ordenes.count || 0
   // "pendientes" = borrador + enviado (esperando confirmación)
   const pendientes = ordenes.data?.filter(o => ['borrador', 'enviado'].includes(o.estado)).length || 0
-  const alertasActivas    = alertas.count || 0
+  const alertasActivas     = alertas.count || 0
 
   const scores = scoreData.data?.map(p => p.score_actual).filter(Boolean) || []
   const scorePromedio = scores.length
@@ -57,7 +53,6 @@ export const getTendenciaScores = async () => {
   if (error) throw { status: 500, message: error.message }
   if (!data?.length) return []
 
-  // Agrupar por mes y calcular promedio
   const porMes = {}
   data.forEach(e => {
     const fecha = new Date(e.created_at)
@@ -68,7 +63,7 @@ export const getTendenciaScores = async () => {
   })
 
   return Object.values(porMes)
-    .slice(-6) // últimos 6 meses
+    .slice(-6)
     .map(m => ({
       mes:      m.label,
       promedio: m.scores.length
@@ -92,7 +87,7 @@ export const getOrdenesRecientes = async () => {
 
 // ── Dashboard comprador: sus órdenes + resumen ────────────────────────────────
 export const getStatsComprador = async (userId) => {
-  const [misOrdenes, pendientes, provs] = await Promise.all([
+  const [misOrdenes, provs] = await Promise.all([
     supabaseAdmin
       .from('ordenes_compra')
       .select('folio, estado, created_at, proveedores(nombre)')
@@ -100,57 +95,52 @@ export const getStatsComprador = async (userId) => {
       .order('created_at', { ascending: false })
       .limit(10),
     supabaseAdmin
-      .from('ordenes_compra')
-      .select('id', { count: 'exact' })
-      .eq('creado_por', userId)
-      .eq('estado', 'pendiente'),
-    supabaseAdmin
       .from('proveedores')
       .select('id', { count: 'exact' })
       .eq('activo', true),
   ])
 
-  const total = misOrdenes.data?.length || 0
-  const countPendientes = pendientes.count || 0
-  const countAprobadas  = misOrdenes.data?.filter(o => o.estado === 'aprobada').length || 0
+  const todas       = misOrdenes.data || []
+  const pendientesC = todas.filter(o => ['borrador', 'enviado'].includes(o.estado)).length
+  const aprobadas   = todas.filter(o => ['confirmado', 'recibido'].includes(o.estado)).length
 
   return {
     resumen: {
-      misOrdenes: total,
-      pendientes: countPendientes,
-      aprobadas:  countAprobadas,
+      misOrdenes: todas.length,
+      pendientes: pendientesC,
+      aprobadas,
       proveedoresActivos: provs.count || 0,
     },
-    ordenesRecientes: misOrdenes.data || [],
+    ordenesRecientes: todas,
   }
 }
 
 // ── Dashboard analista: evaluaciones pendientes + scores ─────────────────────
 export const getStatsAnalista = async () => {
-  const [provsSinEval, ultimasEvals, tendencia] = await Promise.all([
-    // Proveedores activos sin evaluación reciente (sin score)
+  const ahora   = new Date()
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString()
+
+  const [provsSinEval, ultimasEvals, countMes] = await Promise.all([
     supabaseAdmin
       .from('proveedores')
       .select('id, nombre, categoria, score_actual')
       .eq('activo', true)
       .is('score_actual', null)
       .limit(5),
-    // Últimas evaluaciones realizadas
     supabaseAdmin
       .from('evaluaciones')
       .select('id, score, created_at, proveedores(nombre)')
       .order('created_at', { ascending: false })
       .limit(8),
-    // Total evaluaciones este mes
     supabaseAdmin
       .from('evaluaciones')
       .select('id', { count: 'exact' })
-      .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+      .gte('created_at', inicioMes),
   ])
 
   return {
     proveedoresSinEvaluar: provsSinEval.data || [],
     ultimasEvaluaciones:   ultimasEvals.data || [],
-    evaluacionesMes:       tendencia.count || 0,
+    evaluacionesMes:       countMes.count || 0,
   }
 }

@@ -17,7 +17,10 @@ const Navbar = () => {
   const [badge, setBadge] = useState(0)
 
   useEffect(() => {
-    alertsService.badge().then(r => setBadge(r.count || 0)).catch(() => {})
+    const fetchBadge = () => alertsService.badge().then(r => setBadge(r.count || 0)).catch(() => {})
+    fetchBadge()
+    const interval = setInterval(fetchBadge, 30_000)
+    return () => clearInterval(interval)
   }, [location.pathname])
 
   const handleLogout = async () => {
@@ -53,7 +56,13 @@ const Navbar = () => {
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${rolColors[user?.rol]}`}>
           {user?.rol}
         </span>
-        <span className="text-gray-300 text-sm hidden sm:block">{user?.nombre}</span>
+        <button
+          onClick={() => navigate("/perfil")}
+          className="text-gray-300 text-sm hidden sm:block hover:text-white transition-colors"
+          title="Ver perfil"
+        >
+          {user?.nombre}
+        </button>
         <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm transition-colors">
           Salir
         </button>

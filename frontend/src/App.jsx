@@ -18,7 +18,31 @@ import AlertasPanel         from './pages/alertas/AlertasPanel.jsx'
 import ReglasConfig         from './pages/alertas/ReglasConfig.jsx'
 import UsuariosList         from './pages/usuarios/UsuariosList.jsx'
 import ConfiguracionPage    from './pages/configuracion/ConfiguracionPage.jsx'
+import PerfilPage           from './pages/PerfilPage.jsx'
 import ChatWidget           from './components/chatbot/ChatWidget.jsx'
+import AlertToastContainer  from './components/ui/AlertToast.jsx'
+
+// ── Página 404 personalizada ──────────────────────────────────────────────────
+const NotFoundPage = () => (
+  <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="w-24 h-24 bg-indigo-50 rounded-3xl flex items-center justify-center mb-6">
+      <svg className="w-12 h-12 text-indigo-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+    </div>
+    <h1 className="text-6xl font-bold text-indigo-600 mb-2">404</h1>
+    <h2 className="text-xl font-semibold text-gray-800 mb-3">Página no encontrada</h2>
+    <p className="text-gray-500 text-sm max-w-xs mb-6">
+      La página que buscas no existe o fue movida a otra dirección.
+    </p>
+    <a
+      href="/dashboard"
+      className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+    >
+      Ir al dashboard
+    </a>
+  </div>
+)
 
 // ── Página placeholder para /chatbot (el widget ya está flotante) ──────────────
 const ChatbotPage = () => (
@@ -44,6 +68,7 @@ const AppLayout = () => (
       <Outlet />
     </main>
     <ChatWidget />
+    <AlertToastContainer />
   </div>
 )
 
@@ -61,26 +86,24 @@ const App = () => (
             <Route path="/proveedores"        element={<ProveedoresList />} />
             <Route path="/proveedores/nuevo"  element={<ProveedorForm />} />
             <Route path="/proveedores/:id"    element={<ProveedorPerfil />} />
-            <Route path="/proveedores/:id/editar" element={<ProveedorForm />} />
-            <Route path="/ordenes"        element={<OrdenesList />} />
-            <Route path="/ordenes/nueva"  element={<OrdenForm />} />
-            <Route path="/ordenes/:id"    element={<OrdenDetalle />} />
-            <Route path="/evaluaciones"           element={<EvaluacionesDashboard />} />
-            <Route path="/evaluaciones/nueva"     element={<EvaluacionForm />} />
+            <Route path="/ordenes"            element={<OrdenesList />} />
+            <Route path="/ordenes/nueva"      element={<OrdenForm />} />
+            <Route path="/ordenes/:id"        element={<OrdenDetalle />} />
+            <Route path="/evaluaciones"       element={<EvaluacionesDashboard />} />
+            <Route path="/evaluaciones/nueva" element={<EvaluacionForm />} />
             <Route path="/evaluaciones/criterios" element={<CriteriosConfig />} />
-            <Route path="/alertas"        element={<AlertasPanel />} />
-            <Route path="/alertas/reglas" element={<ReglasConfig />} />
-            <Route path="/chatbot"        element={<ChatbotPage />} />
-            <Route path="/usuarios" element={<ProtectedRoute roles={['admin']} />}>
-              <Route index element={<UsuariosList />} />
-            </Route>
-            <Route path="/configuracion" element={<ConfiguracionPage />} />
+            <Route path="/alertas"            element={<AlertasPanel />} />
+            <Route path="/alertas/reglas"     element={<ReglasConfig />} />
+            <Route path="/usuarios"           element={<UsuariosList />} />
+            <Route path="/chatbot"            element={<ChatbotPage />} />
+            <Route path="/configuracion"      element={<ConfiguracionPage />} />
+            <Route path="/perfil"             element={<PerfilPage />} />
           </Route>
         </Route>
 
         {/* Redirects */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AuthProvider>
   </BrowserRouter>

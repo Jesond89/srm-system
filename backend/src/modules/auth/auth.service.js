@@ -45,3 +45,28 @@ export const loginService = async (email, password) => {
 export const hashPassword = async (password) => {
   return bcrypt.hash(password, 12)
 }
+
+/**
+ * Cambia la contraseña del usuario autenticado verificando la actual.
+ */
+export const cambiarPasswordService = async (userId, passwordActual, passwordNueva) => {
+  const { data: user, error } = await supabaseAdmin
+    .from('usuarios')
+    .select('id, password_hash, activo')
+    .eq('id', userId)
+    .single()
+
+  if (error || !user) throw { status: 404, message: 'Usuario no encontrado' }
+  if (!user.activo)   throw { status: 401, message: 'Usuario inactivo' }
+
+  const valida = await bcrypt.compare(passwordActual, user.password_hash)
+  if (!valida) throw { status: 401, message: 'La contraseña actual es incorrecta' }
+
+  const nuevo_hash = await bcrypt.hash(passwordNueva, 12)
+  const { error: updateErr } = await supabaseAdmin
+    .from('usuarios')
+    .update({ password_hash: nuevo_hash })
+    .eq('id', userId)
+
+  if (updateErr) throw { status: 500, message: 'Error al actualizar contraseña' }
+}

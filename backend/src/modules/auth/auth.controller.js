@@ -1,4 +1,4 @@
-import { loginService } from './auth.service.js'
+import { loginService, cambiarPasswordService } from './auth.service.js'
 
 /**
  * POST /api/auth/login
@@ -31,4 +31,21 @@ export const me = (req, res) => {
  */
 export const logout = (req, res) => {
   res.json({ message: 'Sesión cerrada correctamente' })
+}
+
+/**
+ * PATCH /api/auth/me/password — cambiar contraseña propia
+ */
+export const cambiarMiPassword = async (req, res, next) => {
+  try {
+    const { passwordActual, passwordNueva } = req.body
+    if (!passwordActual || !passwordNueva) {
+      return res.status(400).json({ error: 'Se requieren passwordActual y passwordNueva' })
+    }
+    if (passwordNueva.length < 8) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres' })
+    }
+    await cambiarPasswordService(req.user.id, passwordActual, passwordNueva)
+    res.json({ message: 'Contraseña actualizada correctamente' })
+  } catch (err) { next(err) }
 }
