@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(env.geminiApiKey)
 
 // ── Configuración del modelo ──────────────────────────────────────────────────
 const MODEL_CONFIG = {
-  model: 'gemini-1.5-flash', // más barato que pro
+  model: 'gemini-2.5-flash-lite', // stable, más económico en tokens
   generationConfig: {
     maxOutputTokens: 400,    // limita respuestas largas
     temperature:     0.3,    // más determinista = menos tokens por divagación
@@ -31,15 +31,15 @@ function setCache(key, value) {
 }
 
 // ── System prompt comprimido (< 120 tokens) ───────────────────────────────────
-const SYSTEM_PROMPT = `Eres el asistente del sistema SRM (Gestión de Proveedores).
-Responde en español, de forma concisa. Solo responde sobre: proveedores, órdenes de compra, evaluaciones y alertas del sistema.
-Si no tienes datos suficientes, dilo brevemente. No inventes información.`
+const SYSTEM_PROMPT = `Eres el asistente del sistema SRM (Gestión de Proveedores). Responde siempre en español, de forma concisa y directa.
+Cuando el usuario te manda datos del sistema entre corchetes [Datos del sistema], úsalos como fuente de verdad para responder.
+Solo responde sobre proveedores, órdenes de compra, evaluaciones y alertas. No inventes datos que no estén en el contexto.`
 
 // ── Intent detection — sin llamar a la IA ────────────────────────────────────
 const INTENTS = [
-  { name: 'proveedor',   keywords: ['proveedor','proveedores','empresa','rfc','score','categoría','categoria','activo'] },
-  { name: 'orden',       keywords: ['orden','órdenes','ordenes','compra','oc','folio','entrega','estado','pedido'] },
-  { name: 'evaluacion',  keywords: ['evaluaci','score','calificaci','desempeño','criterio','puntaje'] },
+  { name: 'proveedor',   keywords: ['proveedor','proveedores','empresa','empresas','rfc','score','categoría','categoria','activo','inactivo','distribuidor','distribuidora','supplier'] },
+  { name: 'orden',       keywords: ['orden','órdenes','ordenes','compra','oc','folio','entrega','estado','pedido','compras','pedidos'] },
+  { name: 'evaluacion',  keywords: ['evaluaci','calificaci','desempeño','criterio','puntaje','rendimiento'] },
   { name: 'alerta',      keywords: ['alerta','notificaci','regla','umbral','aviso'] },
 ]
 
@@ -56,36 +56,30 @@ async function fetchContext(intent, message) {
   const lower = message.toLowerCase()
 
   if (intent === 'proveedor') {
-    // Buscar por nombre si el usuario menciona uno
-    let query = supabaseAdmin
+    const { data } = await supabaseAdmin
       .from('proveedores')
-      .select('nombre,rfc,categoria,score_actual,activo')
-      .limit(8)
+      .select('nombre, rfc, categoria, score_actual, activo')
+      .order('score_actual', { ascending: false })
+      .limit(10)
 
-    // Intentar filtrar por nombre mencionado (heurística: palabras > 3 chars)
-    const words = message.match(/\b[a-záéíóúñ]{4,}\b/gi) || []
-    const stopwords = ['cuál','como','tiene','están','todas','todos','dame','lista','muestra','score']
-    const searchWord = words.find(w => !stopwords.includes(w.toLowerCase()))
-    if (searchWord) query = query.ilike('nombre', `%${searchWord}%`)
-
-    const { data } = await query.order('score_actual', { ascending: false })
     return data?.length
-      ? `Proveedores encontrados:\n${data.map(p =>
-          `• ${p.nombre} (RFC:${p.rfc}) | Cat:${p.categoria||'—'} | Score:${p.score_actual?.toFixed(1)||'—'} | ${p.activo?'Activo':'Inactivo'}`
+      ? `Proveedores en el sistema:\n${data.map(p =>
+          `• ${p.nombre} | RFC:${p.rfc} | Categoría:${p.categoria||'—'} | Score:${p.score_actual?.toFixed(1)||'sin score'} | ${p.activo?'Activo':'Inactivo'}`
         ).join('\n')}`
-      : 'No se encontraron proveedores.'
+      : 'No hay proveedores registrados en el sistema.'
   }
 
   if (intent === 'orden') {
     const { data } = await supabaseAdmin
       .from('ordenes_compra')
-      .select('folio,estado,fecha_entrega_esperada,proveedores(nombre)')
+      .select('folio, estado, created_at, proveedores(nombre)')
       .order('created_at', { ascending: false })
       .limit(8)
     return data?.length
-      ? `Últimas órdenes:\n${data.map(o =>
-          `• ${o.folio} | ${o.proveedores?.nombre||'—'} | Estado:${o.estado} | Entrega:${o.fecha_entrega_esperada||'—'}`
-        ).join('\n')}`
+      ? `Órdenes de compra:\n${data.map(o => {
+          const prov = Array.isArray(o.proveedores) ? o.proveedores[0]?.nombre : o.proveedores?.nombre
+          return `• Folio:${o.folio} | Proveedor:${prov||'sin proveedor'} | Estado:${o.estado} | Fecha:${o.created_at?.slice(0,10)}`
+        }).join('\n')}`
       : 'No hay órdenes registradas.'
   }
 
@@ -132,8 +126,11 @@ export const chat = async (message, history = []) => {
   const intent  = detectIntent(message)
   const context = await fetchContext(intent, message)
 
-  // 3. Sliding window — máximo últimos 6 mensajes
-  const trimmedHistory = history.slice(-6)
+  // 3. Sliding window — máximo últimos 6 mensajes, debe empezar con 'user'
+  let trimmedHistory = history.slice(-6)
+  const firstUser = trimmedHistory.findIndex(m => m.role === 'user')
+  if (firstUser > 0) trimmedHistory = trimmedHistory.slice(firstUser)
+  else if (firstUser === -1) trimmedHistory = []
 
   // 4. Construir el prompt con contexto inyectado solo si aplica
   const userMessage = context
@@ -141,13 +138,12 @@ export const chat = async (message, history = []) => {
     : message
 
   // 5. Llamar a Gemini
-  const model = genAI.getGenerativeModel(MODEL_CONFIG)
+  const model = genAI.getGenerativeModel({
+    ...MODEL_CONFIG,
+    systemInstruction: SYSTEM_PROMPT,
+  })
   const chatSession = model.startChat({
-    history: [
-      { role: 'user',  parts: [{ text: SYSTEM_PROMPT }] },
-      { role: 'model', parts: [{ text: 'Entendido. Estoy listo para ayudarte con el sistema SRM.' }] },
-      ...trimmedHistory,
-    ],
+    history: trimmedHistory,
   })
 
   const result = await chatSession.sendMessage(userMessage)
