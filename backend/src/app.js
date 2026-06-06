@@ -10,6 +10,7 @@ import orderRoutes       from './modules/orders/orders.routes.js'
 import evaluationRoutes  from './modules/evaluations/evaluations.routes.js'
 import alertRoutes       from './modules/alerts/alerts.routes.js'
 import userRoutes        from './modules/users/users.routes.js'
+import chatbotRoutes     from './modules/chatbot/chatbot.routes.js'
 import { iniciarCronAlertas } from './jobs/alertas.cron.js'
 
 const app = express()
@@ -31,6 +32,7 @@ app.use('/api/ordenes',       orderRoutes)
 app.use('/api/evaluaciones',  evaluationRoutes)
 app.use('/api/alertas',       alertRoutes)
 app.use('/api/usuarios',      userRoutes)
+app.use('/api/chatbot',       chatbotRoutes)
 
 // ── Manejo de rutas no encontradas ────────────────────────────────────────────
 app.use((req, res) => {
