@@ -1,26 +1,38 @@
-import { Router } from 'express'
-import { authMiddleware }        from '../../middleware/auth.middleware.js'
-import { todos, noAnalista }     from '../../middleware/rbac.middleware.js'
+import { Router }           from 'express'
+import multer               from 'multer'
+import { authMiddleware }   from '../../middleware/auth.middleware.js'
+import { todos, noAnalista } from '../../middleware/rbac.middleware.js'
 import { listar, obtener, crear, actualizar, historial } from './providers.controller.js'
+import { listar as listarDocs, upload, descargar, eliminar } from './documents.controller.js'
 
 const router = Router()
+const storage = multer.memoryStorage()
+const uploader = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf','image/jpeg','image/png',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    allowed.includes(file.mimetype)
+      ? cb(null, true)
+      : cb(new Error('Tipo de archivo no permitido'))
+  }
+})
 
-// Todas las rutas requieren autenticación
 router.use(authMiddleware)
 
-// GET  /api/proveedores         — listar con búsqueda y filtros (todos los roles)
-router.get('/',          todos,       listar)
+// Proveedores
+router.get('/',               todos,      listar)
+router.get('/:id',            todos,      obtener)
+router.get('/:id/historial',  todos,      historial)
+router.post('/',              noAnalista, crear)
+router.put('/:id',            noAnalista, actualizar)
 
-// GET  /api/proveedores/:id     — perfil completo del proveedor
-router.get('/:id',       todos,       obtener)
-
-// GET  /api/proveedores/:id/historial — historial de OCs del proveedor
-router.get('/:id/historial', todos,   historial)
-
-// POST /api/proveedores         — registrar (admin, gerente, comprador)
-router.post('/',         noAnalista,  crear)
-
-// PUT  /api/proveedores/:id     — editar (admin, gerente, comprador)
-router.put('/:id',       noAnalista,  actualizar)
+// Documentos
+router.get('/:id/documentos',               todos,      listarDocs)
+router.post('/:id/documentos',              noAnalista, uploader.single('archivo'), upload)
+router.get('/:id/documentos/:docId/url',    todos,      descargar)
+router.delete('/:id/documentos/:docId',     noAnalista, eliminar)
 
 export default router

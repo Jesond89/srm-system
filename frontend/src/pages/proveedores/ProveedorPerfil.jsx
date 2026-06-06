@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { providersService } from '../../services/providers.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, PencilSquareIcon, ArrowDownTrayIcon,
+         TrashIcon, PaperClipIcon } from '@heroicons/react/24/outline'
+import api from '../../services/api.js'
 
 const categoriaColors = {
   A: 'bg-green-100 text-green-700',
@@ -26,9 +28,14 @@ const ProveedorPerfil = () => {
   const { user }  = useAuth()
   const canEdit   = ['admin','gerente','comprador'].includes(user?.rol)
 
-  const [proveedor, setProveedor] = useState(null)
-  const [loading,   setLoading]   = useState(true)
-  const [tab,       setTab]       = useState('info')
+  const [proveedor,   setProveedor]   = useState(null)
+  const [loading,     setLoading]     = useState(true)
+  const [tab,         setTab]         = useState('info')
+  const [uploading,   setUploading]   = useState(false)
+  const [tipoDoc,     setTipoDoc]     = useState('contrato')
+  const [documentos,  setDocumentos]  = useState([])
+  const [loadingDocs, setLoadingDocs] = useState(false)
+  const fileRef = useRef()
 
   useEffect(() => {
     providersService.obtener(id)
@@ -36,6 +43,56 @@ const ProveedorPerfil = () => {
       .catch(() => navigate('/proveedores'))
       .finally(() => setLoading(false))
   }, [id, navigate])
+
+  useEffect(() => {
+    if (tab === 'documentos') {
+      setLoadingDocs(true)
+      providersService.listarDocumentos(id)
+        .then(setDocumentos)
+        .finally(() => setLoadingDocs(false))
+    }
+  }, [tab, id])
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('archivo', file)
+      fd.append('tipo', tipoDoc)
+      const nuevo = await providersService.subirDocumento(id, fd)
+      setDocumentos(prev => [nuevo, ...prev])
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al subir archivo')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleDescargar = async (docId, nombre) => {
+    try {
+      const { url } = await providersService.urlDocumento(id, docId)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = nombre
+      a.target = '_blank'
+      a.click()
+    } catch {
+      alert('Error al obtener URL de descarga')
+    }
+  }
+
+  const handleEliminar = async (docId) => {
+    if (!confirm('¿Eliminar este documento?')) return
+    try {
+      await providersService.eliminarDocumento(id, docId)
+      setDocumentos(prev => prev.filter(d => d.id !== docId))
+    } catch {
+      alert('Error al eliminar documento')
+    }
+  }
 
   if (loading) return <div className="p-8 text-gray-400">Cargando...</div>
   if (!proveedor) return null
@@ -90,12 +147,17 @@ const ProveedorPerfil = () => {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-5">
-        {['info', 'historial', 'evaluaciones'].map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors capitalize ${
-              tab === t ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'
+        {[
+          { key: 'info',        label: 'Información' },
+          { key: 'historial',   label: 'Historial OCs' },
+          { key: 'evaluaciones',label: 'Evaluaciones' },
+          { key: 'documentos',  label: 'Documentos' },
+        ].map(({ key, label }) => (
+          <button key={key} onClick={() => setTab(key)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tab === key ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}>
-            {t === 'info' ? 'Información' : t === 'historial' ? 'Historial OCs' : 'Evaluaciones'}
+            {label}
           </button>
         ))}
       </div>
@@ -165,6 +227,94 @@ const ProveedorPerfil = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {/* Tab: Documentos */}
+      {tab === 'documentos' && (
+        <div className="space-y-4">
+          {/* Subir documento */}
+          {canEdit && (
+            <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-wrap items-center gap-3">
+              <select
+                value={tipoDoc}
+                onChange={e => setTipoDoc(e.target.value)}
+                className="input text-sm py-1.5"
+              >
+                {['contrato','certificado','factura','cotizacion','otro'].map(t => (
+                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                ))}
+              </select>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="hidden"
+                onChange={handleUpload}
+              />
+              <button
+                onClick={() => fileRef.current.click()}
+                disabled={uploading}
+                className="btn-primary flex items-center gap-2 text-sm py-1.5"
+              >
+                <PaperClipIcon className="w-4 h-4" />
+                {uploading ? 'Subiendo...' : 'Subir documento'}
+              </button>
+            </div>
+          )}
+
+          {/* Lista de documentos */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            {loadingDocs ? (
+              <p className="p-6 text-center text-gray-400 text-sm">Cargando documentos...</p>
+            ) : documentos.length === 0 ? (
+              <p className="p-6 text-center text-gray-400 text-sm">Sin documentos adjuntos</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-dark text-white text-left">
+                    <th className="px-4 py-3 font-medium">Nombre</th>
+                    <th className="px-4 py-3 font-medium">Tipo</th>
+                    <th className="px-4 py-3 font-medium">Fecha</th>
+                    <th className="px-4 py-3 font-medium text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {documentos.map((doc, i) => (
+                    <tr key={doc.id} className={i % 2 === 0 ? '' : 'bg-gray-50'}>
+                      <td className="px-4 py-3 text-gray-700 flex items-center gap-2">
+                        <PaperClipIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate max-w-xs">{doc.nombre}</span>
+                      </td>
+                      <td className="px-4 py-3 capitalize text-gray-500">{doc.tipo}</td>
+                      <td className="px-4 py-3 text-gray-400 font-mono text-xs">
+                        {new Date(doc.created_at).toLocaleDateString('es-MX')}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleDescargar(doc.id, doc.nombre)}
+                            title="Descargar"
+                            className="text-primary hover:text-primary/80"
+                          >
+                            <ArrowDownTrayIcon className="w-4 h-4" />
+                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => handleEliminar(doc.id)}
+                              title="Eliminar"
+                              className="text-red-400 hover:text-red-600"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
     </div>
