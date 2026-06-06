@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="180" viewBox="0 0 600 180">
+  <title>SRM System — Logo Principal</title>
+  <!-- Anillo exterior -->
+  <circle cx="90" cy="90" r="68" fill="none" stroke="#C0392B" stroke-width="5"/>
+  <!-- Anillo interior -->
+  <circle cx="90" cy="90" r="58" fill="none" stroke="#E74C3C" stroke-width="1"/>
+  <!-- Arco superior -->
+  <path d="M 38 55 A 62 62 0 0 1 142 55" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arco inferior punteado -->
+  <path d="M 38 125 A 62 62 0 0 0 142 125" fill="none" stroke="#C0392B" stroke-width="1" stroke-linecap="round" stroke-dasharray="3,4"/>
+  <!-- Iniciales -->
+  <text x="86" y="83" font-family="Georgia, serif" font-size="32" font-weight="bold" fill="#C0392B" text-anchor="middle">SR</text>
+  <text x="86" y="112" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="#E74C3C" text-anchor="middle">M</text>
+  <!-- Línea interna -->
+  <line x1="45" y1="94" x2="135" y2="94" stroke="#C0392B" stroke-width="0.8"/>
+  <!-- Texto del nombre -->
+  <text x="185" y="75" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#1A1A1A">SRM</text>
+  <text x="186" y="102" font-family="Arial, sans-serif" font-size="16" fill="#C0392B" letter-spacing="5">SYSTEM</text>
+  <line x1="186" y1="112" x2="570" y2="112" stroke="#C0392B" stroke-width="1"/>
+  <text x="186" y="128" font-family="Arial, sans-serif" font-size="10" fill="#888888" letter-spacing="1.5">SUPPLIER RELATIONSHIP MANAGEMENT</text>
+</svg>
