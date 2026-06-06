@@ -1,12 +1,12 @@
 import {
-  getReglas, createRegla, toggleRegla,
+  getReglas, createRegla, updateRegla,
   getAlertas, marcarLeida, marcarAtendida, contarNoLeidas, createAlerta, ejecutarMotorReglas
 } from './alerts.service.js'
 
 export const listarReglas  = async (req, res, next) => { try { res.json(await getReglas()) } catch(e){next(e)} }
 export const crearRegla    = async (req, res, next) => { try { res.status(201).json(await createRegla(req.body)) } catch(e){next(e)} }
 export const actualizarRegla = async (req, res, next) => {
-  try { res.json(await toggleRegla(req.params.id, req.body.activa)) } catch(e){next(e)}
+  try { res.json(await updateRegla(req.params.id, req.body)) } catch(e){next(e)}
 }
 
 export const listarAlertas = async (req, res, next) => {

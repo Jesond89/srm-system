@@ -26,14 +26,21 @@ export const createRegla = async ({ nombre, tipo, condicion, severidad }) => {
   return data
 }
 
-export const toggleRegla = async (id, activa) => {
+export const updateRegla = async (id, { nombre, severidad, condicion, activa }) => {
+  const updates = {}
+  if (nombre    !== undefined) updates.nombre    = nombre
+  if (severidad !== undefined) updates.severidad = severidad
+  if (condicion !== undefined) updates.condicion = condicion
+  if (activa    !== undefined) updates.activa    = activa
+
   const { data, error } = await supabaseAdmin
     .from('reglas_alerta')
-    .update({ activa })
+    .update(updates)
     .eq('id', id)
     .select()
     .single()
   if (error) throw { status: 500, message: error.message }
+  if (!data) throw { status: 404, message: 'Regla no encontrada' }
   return data
 }
 
