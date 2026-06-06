@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authMiddleware }          from '../../middleware/auth.middleware.js'
-import { todos, adminGerente }     from '../../middleware/rbac.middleware.js'
+import { todos, adminGerente, noComprador } from '../../middleware/rbac.middleware.js'
 import {
   listarCriterios, crearCriterio, editarCriterio,
   listarEvaluaciones, calcular, dashboard
@@ -19,6 +19,6 @@ router.put('/criterios/:id',adminGerente, editarCriterio)
 
 // Evaluaciones
 router.get('/',             todos,        listarEvaluaciones)
-router.post('/',            adminGerente, calcular)
+router.post('/',            noComprador,  calcular)   // analista puede crear evaluaciones
 
 export default router

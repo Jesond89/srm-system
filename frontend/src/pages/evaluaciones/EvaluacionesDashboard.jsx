@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { evaluationsService } from '../../services/evaluations.service.js'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
          BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts'
-import { PlusIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, Cog6ToothIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { generarReporteEvaluaciones } from '../../services/reportes.service.js'
 
 const catColors = { A: '#27ae60', B: '#2980b9', C: '#f39c12', D: '#c0392b' }
 
@@ -47,6 +48,12 @@ const EvaluacionesDashboard = () => {
           <p className="text-sm text-gray-400 mt-0.5">Dashboard de desempeño de proveedores</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => generarReporteEvaluaciones(recientes || [])}
+            className="btn-secondary flex items-center gap-2 text-sm"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" /> Exportar PDF
+          </button>
           {canEdit && (
             <>
               <button onClick={() => navigate('/evaluaciones/criterios')}

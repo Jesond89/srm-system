@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { providersService } from '../../services/providers.service.js'
+import { generarReporteProveedores } from '../../services/reportes.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { MagnifyingGlassIcon, PlusIcon, FunnelIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, PlusIcon, FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 
 const categoriaColors = {
   A: 'bg-green-100 text-green-700',
@@ -46,12 +47,24 @@ const ProveedoresList = () => {
           <h1 className="text-2xl font-bold font-heading text-gray-800">Proveedores</h1>
           <p className="text-sm text-gray-400 mt-0.5">{total} proveedor{total !== 1 ? 'es' : ''} registrado{total !== 1 ? 's' : ''}</p>
         </div>
-        {canCreate && (
-          <button onClick={() => navigate('/proveedores/nuevo')} className="btn-primary flex items-center gap-2">
-            <PlusIcon className="w-4 h-4" />
-            Nuevo proveedor
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              const res = await providersService.listar({ limit: 500 })
+              generarReporteProveedores(res.data || [])
+            }}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            Exportar PDF
           </button>
-        )}
+          {canCreate && (
+            <button onClick={() => navigate('/proveedores/nuevo')} className="btn-primary flex items-center gap-2">
+              <PlusIcon className="w-4 h-4" />
+              Nuevo proveedor
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filtros */}

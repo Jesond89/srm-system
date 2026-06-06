@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ordersService } from '../../services/orders.service.js'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { PlusIcon, FunnelIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { generarReporteOrdenes } from '../../services/reportes.service.js'
 
 const estadoColors = {
   borrador:    'bg-gray-100   text-gray-600',
@@ -49,11 +50,19 @@ const OrdenesList = () => {
           <h1 className="text-2xl font-bold font-heading text-gray-800">Órdenes de compra</h1>
           <p className="text-sm text-gray-400 mt-0.5">{total} orden{total !== 1 ? 'es' : ''}</p>
         </div>
-        {canCreate && (
-          <button onClick={() => navigate('/ordenes/nueva')} className="btn-primary flex items-center gap-2">
-            <PlusIcon className="w-4 h-4" /> Nueva orden
+        <div className="flex gap-2">
+          <button
+            onClick={() => generarReporteOrdenes(ordenes)}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" /> Exportar PDF
           </button>
-        )}
+          {canCreate && (
+            <button onClick={() => navigate('/ordenes/nueva')} className="btn-primary flex items-center gap-2">
+              <PlusIcon className="w-4 h-4" /> Nueva orden
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filtro estado */}

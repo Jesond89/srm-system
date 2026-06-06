@@ -24,4 +24,5 @@ export const rbac = (...rolesPermitidos) => {
 export const soloAdmin    = rbac('admin')
 export const adminGerente = rbac('admin', 'gerente')
 export const noAnalista   = rbac('admin', 'gerente', 'comprador')
-export const todos         = rbac('admin', 'gerente', 'comprador', 'analista')
+export const noComprador  = rbac('admin', 'gerente', 'analista')   // analista puede evaluar
+export const todos        = rbac('admin', 'gerente', 'comprador', 'analista')
