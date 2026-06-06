@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1584" height="396" viewBox="0 0 1584 396">
+  <title>SRM System — Banner LinkedIn / Facebook</title>
+  <rect width="1584" height="396" fill="#1A1A2E"/>
+  <!-- Círculos decorativos fondo -->
+  <circle cx="1480" cy="100" r="200" fill="none" stroke="rgba(192,57,43,0.18)" stroke-width="2"/>
+  <circle cx="1480" cy="100" r="140" fill="none" stroke="rgba(192,57,43,0.12)" stroke-width="2"/>
+  <circle cx="1480" cy="100" r="80" fill="none" stroke="rgba(192,57,43,0.10)" stroke-width="2"/>
+  <!-- Logo ícono -->
+  <circle cx="160" cy="198" r="130" fill="none" stroke="#C0392B" stroke-width="8"/>
+  <circle cx="160" cy="198" r="108" fill="none" stroke="#E74C3C" stroke-width="2"/>
+  <path d="M 46 118 A 126 126 0 0 1 274 118" fill="none" stroke="#C0392B" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 46 278 A 126 126 0 0 0 274 278" fill="none" stroke="#E74C3C" stroke-width="2" stroke-dasharray="8,10"/>
+  <text x="155" y="188" font-family="Georgia, serif" font-size="70" font-weight="bold" fill="white" text-anchor="middle">SR</text>
+  <text x="155" y="248" font-family="Georgia, serif" font-size="45" font-weight="bold" fill="#E74C3C" text-anchor="middle">M</text>
+  <line x1="70" y1="205" x2="248" y2="205" stroke="#C0392B" stroke-width="2.5"/>
+  <!-- Línea divisoria -->
+  <line x1="320" y1="80" x2="320" y2="316" stroke="#C0392B" stroke-width="3"/>
+  <!-- Texto -->
+  <text x="370" y="180" font-family="Arial, sans-serif" font-size="100" font-weight="bold" fill="white">SRM System</text>
+  <text x="370" y="228" font-family="Arial, sans-serif" font-size="32" fill="#E74C3C" letter-spacing="6">SUPPLIER RELATIONSHIP MANAGEMENT</text>
+  <text x="370" y="278" font-family="Arial, sans-serif" font-size="24" fill="#AAAAAA">Gestión inteligente de proveedores · Evaluación · Alertas · Chatbot IA</text>
+</svg>
