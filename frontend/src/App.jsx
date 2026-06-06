@@ -17,6 +17,7 @@ import CriteriosConfig      from './pages/evaluaciones/CriteriosConfig.jsx'
 import AlertasPanel         from './pages/alertas/AlertasPanel.jsx'
 import ReglasConfig         from './pages/alertas/ReglasConfig.jsx'
 import UsuariosList         from './pages/usuarios/UsuariosList.jsx'
+import ChatWidget           from './components/chatbot/ChatWidget.jsx'
 
 // Layout principal con navbar + sidebar
 const AppLayout = () => (
@@ -26,6 +27,7 @@ const AppLayout = () => (
     <main className="ml-60 pt-16 min-h-screen">
       <Outlet />
     </main>
+    <ChatWidget />
   </div>
 )
 
