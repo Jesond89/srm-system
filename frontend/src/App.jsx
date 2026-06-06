@@ -16,6 +16,7 @@ import EvaluacionForm       from './pages/evaluaciones/EvaluacionForm.jsx'
 import CriteriosConfig      from './pages/evaluaciones/CriteriosConfig.jsx'
 import AlertasPanel         from './pages/alertas/AlertasPanel.jsx'
 import ReglasConfig         from './pages/alertas/ReglasConfig.jsx'
+import UsuariosList         from './pages/usuarios/UsuariosList.jsx'
 
 // Layout principal con navbar + sidebar
 const AppLayout = () => (
@@ -52,7 +53,9 @@ const App = () => (
             <Route path="/alertas"         element={<AlertasPanel />} />
             <Route path="/alertas/reglas"  element={<ReglasConfig />} />
             <Route path="/chatbot"      element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
-            <Route path="/usuarios"     element={<ProtectedRoute roles={['admin']} />} />
+            <Route path="/usuarios"     element={<ProtectedRoute roles={['admin']} />}>
+              <Route index element={<UsuariosList />} />
+            </Route>
             <Route path="/configuracion" element={<div className="p-6 text-gray-500">Módulo en desarrollo…</div>} />
           </Route>
         </Route>
