@@ -1,0 +1,20 @@
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+version: '3.9'
+
+services:
+
+  backend:
+    build:
+      target: runner          # imagen final optimizada (multi-stage)
+    image: srm-backend:prod
+    command: node src/app.js  # sin nodemon en producción
+    volumes: []               # sin bind-mount en producción
+
+  frontend:
+    build:
+      target: runner          # nginx con el build estático
+    image: srm-frontend:prod
+    command: nginx -g 'daemon off;'
+    volumes: []
+    ports:
+      - "80:80"

@@ -1,40 +1,68 @@
 version: '3.9'
 
+# ── Variables comunes ─────────────────────────────────────────────────────────
+x-restart: &restart
+  restart: unless-stopped
+
+# ─────────────────────────────────────────────────────────────────────────────
 services:
+
+  # ── Backend: Node.js + Express ──────────────────────────────────────────────
   backend:
+    <<: *restart
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: deps          # dev: solo la stage de deps
+    image: srm-backend:dev
     container_name: srm-backend
+    working_dir: /app
+    command: npx nodemon src/app.js   # hot reload en dev
     ports:
       - "4000:4000"
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend/src:/app/src        # hot reload del código
+      - backend_modules:/app/node_modules
     networks:
       - srm-network
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
+  # ── Frontend: React + Vite (dev server) ─────────────────────────────────────
   frontend:
+    <<: *restart
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: builder       # dev: solo la stage de build
+    image: srm-frontend:dev
     container_name: srm-frontend
+    working_dir: /app
+    command: npx vite --host 0.0.0.0   # exponer en red del contenedor
     ports:
       - "5173:5173"
     env_file:
       - ./frontend/.env
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend/src:/app/src
+      - frontend_modules:/app/node_modules
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - srm-network
-    restart: unless-stopped
 
+# ─────────────────────────────────────────────────────────────────────────────
 networks:
   srm-network:
     driver: bridge
+
+volumes:
+  backend_modules:
+  frontend_modules:

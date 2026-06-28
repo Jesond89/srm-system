@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PharmaControl — Paleta de Colores & Guía de Estilo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Fondos ────────────────────────────────── */
+      --bg-primary:   #0D1B2A;
+      --bg-secondary: #162435;
+      --bg-card:      #1A2E42;
+      --bg-input:     #1F3245;
+
+      /* ── Acento verde ──────────────────────────── */
+      --green-400: #4AFF9A;
+      --green-500: #22FF7F;   /* ← color principal PharmaControl */
+      --green-600: #00E86A;
+      --green-700: #00C45A;
+
+      /* ── Texto ─────────────────────────────────── */
+      --text-white:   #FFFFFF;
+      --text-muted:   #94A3B8;
+      --text-dim:     #64748B;
+
+      /* ── Alertas semánticas ────────────────────── */
+      --alert-critical-bg: #7B1D1D;
+      --alert-critical-tx: #FCA5A5;
+      --alert-warning-bg:  #78350F;
+      --alert-warning-tx:  #FCD34D;
+      --alert-success-bg:  #14532D;
+      --alert-success-tx:  #86EFAC;
+      --alert-info-bg:     #1E3A5F;
+      --alert-info-tx:     #93C5FD;
+
+      /* ── Tipografía ────────────────────────────── */
+      --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-white);
+      font-family: var(--font-sans);
+      padding: 40px 48px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--bg-card);
+      padding-bottom: 32px;
+    }
+    .brand-logo {
+      background: var(--bg-secondary);
+      border: 2px solid var(--green-500);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--green-500);
+      letter-spacing: -0.5px;
+    }
+    .brand-meta { line-height: 1.4; }
+    .brand-meta h1 { font-size: 26px; font-weight: 800; }
+    .brand-meta p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Sección ─────────────────────────────────── */
+    .section { margin-bottom: 56px; }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green-500);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--bg-card);
+    }
+
+    /* ── Grilla de swatches ─────────────────────── */
+    .swatches { display: flex; flex-wrap: wrap; gap: 16px; }
+
+    .swatch {
+      width: 160px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-card);
+    }
+    .swatch-color {
+      height: 80px;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      padding: 8px;
+    }
+    .swatch-copy {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      cursor: pointer;
+      user-select: all;
+    }
+    .swatch-info { padding: 10px 12px 12px; }
+    .swatch-name  { font-size: 12px; font-weight: 600; color: var(--text-white); margin-bottom: 2px; }
+    .swatch-hex   { font-size: 11px; color: var(--text-muted); font-family: 'Courier New', monospace; }
+    .swatch-usage { font-size: 10px; color: var(--text-dim); margin-top: 4px; line-height: 1.4; }
+
+    /* ── Tipografía ─────────────────────────────── */
+    .type-row {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-card);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+    .type-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      min-width: 160px;
+    }
+    .type-sample { color: var(--text-white); }
+
+    /* ── Alertas ─────────────────────────────────── */
+    .alert-row {
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── Componentes ─────────────────────────────── */
+    .components { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .comp-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-card);
+      border-radius: 14px;
+      padding: 20px 24px;
+      min-width: 200px;
+    }
+    .comp-title { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; }
+
+    .btn-primary {
+      background: var(--green-500);
+      color: #0D1B2A;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--green-500);
+      border: 1.5px solid var(--green-500);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+    .btn-ghost {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 13px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 3px;
+    }
+
+    .input-demo {
+      background: var(--bg-input);
+      border: 1.5px solid var(--bg-card);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-white);
+      font-size: 13px;
+      font-family: var(--font-sans);
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .input-demo:focus { outline: 2px solid var(--green-500); border-color: transparent; }
+
+    /* ── Logo variantes ──────────────────────────── */
+    .logos { display: flex; flex-wrap: wrap; gap: 20px; }
+    .logo-card {
+      border-radius: 14px;
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+    .logo-variant { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+
+    /* ── Grid layout ─────────────────────────────── */
+    .grid-demo {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-card);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .grid-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .grid-col {
+      background: var(--bg-card);
+      border: 1px dashed var(--green-500);
+      border-radius: 6px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--green-500);
+      flex: 1;
+      opacity: 0.7;
+    }
+    .grid-col.span2 { flex: 2; opacity: 1; }
+    .grid-col.span3 { flex: 3; opacity: 1; }
+
+    /* ── Footer ─────────────────────────────────── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--bg-card);
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Encabezado de marca ──────────────────────────────────────── -->
+  <div class="brand">
+    <div class="brand-logo">PharmaControl</div>
+    <div class="brand-meta">
+      <h1>Guía de Estilo & Paleta de Colores</h1>
+      <p>Sistema de Monitoreo de Cumplimiento Regulatorio · Versión 1.0 · 2025</p>
+    </div>
+  </div>
+
+  <!-- ── 1. FONDOS ─────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Colores de Fondo</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0D1B2A">
+          <span class="swatch-copy">#0D1B2A</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">BG Primary</div>
+          <div class="swatch-hex">--bg-primary · #0D1B2A</div>
+          <div class="swatch-usage">Fondo principal de toda la app</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#162435">
+          <span class="swatch-copy">#162435</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">BG Secondary</div>
+          <div class="swatch-hex">--bg-secondary · #162435</div>
+          <div class="swatch-usage">Secciones, paneles y contenedores</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1A2E42">
+          <span class="swatch-copy">#1A2E42</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">BG Card</div>
+          <div class="swatch-hex">--bg-card · #1A2E42</div>
+          <div class="swatch-usage">Cards de sectores y estadísticas</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1F3245">
+          <span class="swatch-copy">#1F3245</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">BG Input</div>
+          <div class="swatch-hex">--bg-input · #1F3245</div>
+          <div class="swatch-usage">Campos de texto y chat input</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. VERDE PRIMARIO ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Verde Primario — Color de Marca</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#4AFF9A">
+          <span class="swatch-copy">#4AFF9A</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">Green 400</div>
+          <div class="swatch-hex">--green-400 · #4AFF9A</div>
+          <div class="swatch-usage">Hover states, highlights suaves</div>
+        </div>
+      </div>
+      <div class="swatch" style="border: 2px solid #22FF7F;">
+        <div class="swatch-color" style="background:#22FF7F; height:96px;">
+          <span class="swatch-copy" style="font-size:10px; padding: 3px 7px;">#22FF7F ★ Principal</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#22FF7F">Green 500 — PRIMARIO</div>
+          <div class="swatch-hex">--green-500 · #22FF7F</div>
+          <div class="swatch-usage">Logo, botones CTA, números estadísticos, títulos de cards</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#00E86A">
+          <span class="swatch-copy">#00E86A</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">Green 600</div>
+          <div class="swatch-hex">--green-600 · #00E86A</div>
+          <div class="swatch-usage">Botones en hover state activo</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#00C45A">
+          <span class="swatch-copy">#00C45A</span>
+        </div>
+        <div class="swatch-info">
+          <div class="swatch-name">Green 700</div>
+          <div class="swatch-hex">--green-700 · #00C45A</div>
+          <div class="swatch-usage">Íconos secundarios y bordes sutiles</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. TEXTO ──────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Colores de Texto</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FFFFFF; height:60px;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Blanco</div>
+          <div class="swatch-hex">#FFFFFF</div>
+          <div class="swatch-usage">Títulos y texto principal</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#94A3B8; height:60px;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Muted</div>
+          <div class="swatch-hex">#94A3B8</div>
+          <div class="swatch-usage">Subtítulos, descripciones</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#64748B; height:60px;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Dim</div>
+          <div class="swatch-hex">#64748B</div>
+          <div class="swatch-usage">Placeholders, metadatos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. ALERTAS ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Colores de Alertas Regulatorias</div>
+    <div style="max-width:700px">
+      <div class="alert-row" style="background:#7B1D1D; color:#FCA5A5;">
+        <div class="alert-dot" style="background:#FCA5A5;"></div>
+        <strong>Crítica</strong> — #7B1D1D / texto #FCA5A5 · Nuevas regulaciones que requieren acción inmediata
+      </div>
+      <div class="alert-row" style="background:#78350F; color:#FCD34D;">
+        <div class="alert-dot" style="background:#FCD34D;"></div>
+        <strong>Advertencia</strong> — #78350F / texto #FCD34D · Actualizaciones en normativas vigentes
+      </div>
+      <div class="alert-row" style="background:#14532D; color:#86EFAC;">
+        <div class="alert-dot" style="background:#86EFAC;"></div>
+        <strong>Aprobación</strong> — #14532D / texto #86EFAC · Certificaciones aprobadas correctamente
+      </div>
+      <div class="alert-row" style="background:#1E3A5F; color:#93C5FD;">
+        <div class="alert-dot" style="background:#93C5FD;"></div>
+        <strong>Información</strong> — #1E3A5F / texto #93C5FD · Notificaciones informativas del sistema
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. TIPOGRAFÍA ────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Tipografía</div>
+    <div class="type-row">
+      <span class="type-label">H1 — Hero Title<br>800 · 48–64px</span>
+      <span class="type-sample" style="font-size:42px; font-weight:800; line-height:1.1;">Monitoreo Regulatorio</span>
+    </div>
+    <div class="type-row">
+      <span class="type-label">H2 — Section Title<br>700 · 28–32px</span>
+      <span class="type-sample" style="font-size:28px; font-weight:700;">Alertas Regulatorias</span>
+    </div>
+    <div class="type-row">
+      <span class="type-label">H3 — Card Title<br>700 · 18–20px · verde</span>
+      <span class="type-sample" style="font-size:19px; font-weight:700; color:#22FF7F;">Farmacéutica</span>
+    </div>
+    <div class="type-row">
+      <span class="type-label">Body — Descripción<br>400 · 14–16px · muted</span>
+      <span class="type-sample" style="font-size:15px; color:#94A3B8; line-height:1.6;">Seguimiento de regulaciones sanitarias, trazabilidad y control de medicamentos.</span>
+    </div>
+    <div class="type-row">
+      <span class="type-label">Stat — KPI<br>800 · 36px · verde</span>
+      <span class="type-sample" style="font-size:36px; font-weight:800; color:#22FF7F;">+500</span>
+    </div>
+    <div class="type-row">
+      <span class="type-label">Label Stat<br>400 · 13px · muted</span>
+      <span class="type-sample" style="font-size:13px; color:#94A3B8;">Normativas monitoreadas</span>
+    </div>
+    <p style="font-size:11px; color:#64748B; margin-top:12px;">
+      Familia: <strong style="color:#94A3B8;">Inter</strong> · Fallbacks: Segoe UI, system-ui, sans-serif
+    </p>
+  </div>
+
+  <!-- ── 6. VARIANTES DE LOGO ──────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Variantes del Logotipo</div>
+    <div class="logos">
+      <!-- Navbar (dark bg) -->
+      <div class="logo-card" style="background:#162435; border:1px solid #1A2E42;">
+        <div style="font-size:22px; font-weight:800; color:#22FF7F; letter-spacing:-0.5px;">PharmaControl</div>
+        <div class="logo-variant">Navbar · fondo oscuro</div>
+      </div>
+      <!-- Positivo (light bg) -->
+      <div class="logo-card" style="background:#FFFFFF; border:1px solid #E5E7EB;">
+        <div style="font-size:22px; font-weight:800; color:#0D5C3A; letter-spacing:-0.5px;">PharmaControl</div>
+        <div class="logo-variant" style="color:#6B7280;">Documentos · fondo claro</div>
+      </div>
+      <!-- Isotipo -->
+      <div class="logo-card" style="background:#162435; border:1px solid #1A2E42;">
+        <div style="
+          width:56px; height:56px; border-radius:12px;
+          background:#22FF7F;
+          display:flex; align-items:center; justify-content:center;
+          font-size:22px; font-weight:900; color:#0D1B2A; letter-spacing:-1px;
+        ">PC</div>
+        <div class="logo-variant">Isotipo · 56×56px</div>
+      </div>
+      <!-- Redes sociales -->
+      <div class="logo-card" style="background:#22FF7F; border:1px solid #00E86A;">
+        <div style="font-size:20px; font-weight:900; color:#0D1B2A; letter-spacing:-0.5px;">PharmaControl</div>
+        <div class="logo-variant" style="color:#0D5C3A;">Redes sociales · fondo verde</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 7. COMPONENTES ────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Componentes UI</div>
+    <div class="components">
+      <!-- Botones -->
+      <div class="comp-card" style="min-width:200px;">
+        <div class="comp-title">Botones</div>
+        <button class="btn-primary">Explorar Plataforma</button>
+        <button class="btn-outline">Ver Alertas</button>
+        <button class="btn-ghost">Cancelar</button>
+      </div>
+      <!-- Inputs -->
+      <div class="comp-card" style="min-width:260px;">
+        <div class="comp-title">Inputs</div>
+        <input class="input-demo" type="text" placeholder="Pregunta algo..." />
+        <input class="input-demo" type="text" value="Regulación sanitaria NOM-059" />
+      </div>
+      <!-- Badges -->
+      <div class="comp-card">
+        <div class="comp-title">Badges de Sector</div>
+        <div>
+          <span class="badge" style="background:#0D5C3A; color:#86EFAC;">Farmacéutica</span>
+          <span class="badge" style="background:#1E3A5F; color:#93C5FD;">Banca</span>
+          <span class="badge" style="background:#3B1F6E; color:#C4B5FD;">Energía</span>
+          <span class="badge" style="background:#78350F; color:#FCD34D;">Pendiente</span>
+          <span class="badge" style="background:#14532D; color:#86EFAC;">Aprobado</span>
+          <span class="badge" style="background:#7B1D1D; color:#FCA5A5;">Crítico</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. RETÍCULA ───────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Retícula y Layout</div>
+    <div class="grid-demo">
+      <p style="font-size:11px; color:#64748B; margin-bottom:12px;">Ejemplo: layout de 3 columnas (Cards de Sectores)</p>
+      <div class="grid-row">
+        <div class="grid-col span3" style="font-size:11px; opacity:0.5; color:#64748B;">Navbar fija · h-16 · 100% ancho · bg #162435</div>
+      </div>
+      <div class="grid-row">
+        <div class="grid-col" style="height:120px; opacity:0.6; font-size:10px;">Card Banca</div>
+        <div class="grid-col" style="height:120px; opacity:0.8; font-size:10px;">Card Farmacéutica</div>
+        <div class="grid-col" style="height:120px; opacity:0.6; font-size:10px;">Card Energía</div>
+      </div>
+      <div class="grid-row">
+        <div class="grid-col" style="opacity:0.7; font-size:10px;">KPI +500</div>
+        <div class="grid-col" style="opacity:0.7; font-size:10px;">KPI 24/7</div>
+        <div class="grid-col" style="opacity:0.7; font-size:10px;">KPI 98%</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:16px;">
+      <div style="background:#162435; border:1px solid #1A2E42; border-radius:10px; padding:14px 18px; font-size:12px;">
+        <span style="color:#22FF7F; font-weight:700;">Gap entre cards:</span><br>
+        <span style="color:#94A3B8;">24px (gap-6)</span>
+      </div>
+      <div style="background:#162435; border:1px solid #1A2E42; border-radius:10px; padding:14px 18px; font-size:12px;">
+        <span style="color:#22FF7F; font-weight:700;">Padding interno cards:</span><br>
+        <span style="color:#94A3B8;">24px (p-6)</span>
+      </div>
+      <div style="background:#162435; border:1px solid #1A2E42; border-radius:10px; padding:14px 18px; font-size:12px;">
+        <span style="color:#22FF7F; font-weight:700;">Border radius cards:</span><br>
+        <span style="color:#94A3B8;">12px (rounded-xl)</span>
+      </div>
+      <div style="background:#162435; border:1px solid #1A2E42; border-radius:10px; padding:14px 18px; font-size:12px;">
+        <span style="color:#22FF7F; font-weight:700;">Max width contenido:</span><br>
+        <span style="color:#94A3B8;">1280px (max-w-7xl)</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    PharmaControl · Sistema de Monitoreo de Cumplimiento Regulatorio · Guía de Estilo v1.0 · 2025<br>
+    Jesús Olav Pineda Salinas · 202304037 · Universidad Tecnológica de Acapulco
+  </footer>
+
+</body>
+</html>
