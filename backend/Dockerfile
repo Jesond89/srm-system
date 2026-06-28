@@ -1,11 +1,11 @@
 # ── Stage 1: instalar dependencias de producción ─────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # ── Stage 2: imagen final mínima ─────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 # Usuario sin privilegios (seguridad)
 RUN addgroup -g 1001 -S nodejs && adduser -S srm -u 1001
